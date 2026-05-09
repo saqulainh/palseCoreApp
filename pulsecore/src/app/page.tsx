@@ -90,7 +90,7 @@ export default function SplashPage() {
 
       {/* CTAs */}
       <div className="flex flex-col gap-3 w-full max-w-sm">
-        <Link href="/onboarding"
+        <Link href="/auth/register"
           className="h-[56px] rounded-xl flex items-center justify-center gap-2 text-[18px] font-semibold transition-all active:scale-[0.97] hover:opacity-90"
           style={{
             fontFamily: "Lexend, sans-serif",
@@ -101,7 +101,7 @@ export default function SplashPage() {
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
           Get Started Free
         </Link>
-        <Link href="/dashboard"
+        <Link href="/auth/login"
           className="h-[56px] rounded-xl flex items-center justify-center gap-2 text-[18px] font-semibold transition-all active:scale-[0.97] border border-[#2D2D3A] hover:border-[#b8c4ff]"
           style={{ fontFamily: "Lexend, sans-serif", color: "#F9FAFB" }}>
           Sign In

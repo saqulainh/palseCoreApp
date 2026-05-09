@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/userStore";
 import { TopBar } from "./TopBar";
 import { BottomNav } from "./BottomNav";
 import { PageTransition } from "./PageTransition";
@@ -9,6 +12,24 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, title, showBack }: AppShellProps) {
+  const router = useRouter();
+  const { isAuthenticated, fetchUser } = useUserStore();
+
+  useEffect(() => {
+    const token = localStorage.getItem("pulsecore_access_token");
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+    
+    // If we have a token but state says not authenticated (e.g. fresh reload), fetch the user
+    if (!isAuthenticated) {
+      fetchUser().catch(() => {
+        router.push("/auth/login");
+      });
+    }
+  }, [isAuthenticated, fetchUser, router]);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0A0A0F]">
       {/* Background radial glow */}
