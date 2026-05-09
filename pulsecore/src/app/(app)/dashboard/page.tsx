@@ -21,6 +21,8 @@ export default function DashboardPage() {
         setIsLoading(false);
       });
   }, []);
+
+  return (
     <div className="px-5 pt-2 pb-10 space-y-8 max-w-3xl mx-auto">
       {/* ── Greeting ── */}
       <div className="pt-2">
