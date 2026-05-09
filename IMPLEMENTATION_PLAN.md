@@ -186,3 +186,29 @@ pulsecore/src/
 - [x] Step 18 — Responsive QA (Tailwind mobile-first applied throughout) ✅
 - [x] Step 19 — SEO + Performance (Metadata, OpenGraph, Twitter tags) ✅
 - [x] Step 20 — Deploy (Pushed to GitHub: saqulainh/palseCoreApp) ✅
+
+---
+
+## ⚙️ Backend Execution Status (Django MVP)
+
+### 🟢 Phase 5: Infrastructure & Auth (Week 1)
+- [ ] **Step 21 — Project Initialization:** Create `backend/` dir, setup venv, install requirements (django, drf, psycopg2, pgvector, redis), create `pulsecore` project.
+- [ ] **Step 22 — Docker Setup:** Create `docker-compose.yml` for Postgres (+pgvector) and Redis. Boot and verify.
+- [ ] **Step 23 — App Generation:** Generate apps (`accounts`, `workouts`, `recovery`, `habits`, `nutrition`, `coach`, `analytics`) and register them.
+- [ ] **Step 24 — User & Auth API:** Create custom User model, configure SimpleJWT, build serializers/views for login, register, profile.
+
+### 🟡 Phase 6: Core Fitness Engine (Weeks 2-3)
+- [ ] **Step 25 — Workouts API:** Define Workout/Exercise/Set models, build ViewSets for CRUD, history, and logging sets.
+- [ ] **Step 26 — Recovery API:** Define RecoveryScore/MuscleSoreness models, build ViewSets, implement score aggregation logic.
+- [ ] **Step 27 — Habits API:** Define Habit models, build ViewSets, implement toggle endpoint calculating streaks.
+
+### 🟠 Phase 7: AI Coach & Aggregation (Weeks 4-5)
+- [ ] **Step 28 — Nutrition/Analytics API:** Define Meal/Hydration models, build CRUD endpoints.
+- [ ] **Step 29 — RAG AI Coach Backend:** Define Chat models, add VectorField (pgvector), auto-generate embeddings on post_save, build vector search into the Coach streaming endpoint.
+- [ ] **Step 30 — Dashboard Aggregator:** Build `GET /api/v1/dashboard` fetching recovery, workout, and habits efficiently.
+
+### 🔵 Phase 8: Frontend Integration (Week 6)
+- [ ] **Step 31 — API Client:** Update `src/lib/api/client.ts` for Django backend, add JWT interceptors.
+- [ ] **Step 32 — Wire Auth:** Build frontend Login/Register, wire `useUserStore` to Django.
+- [ ] **Step 33 — Wire Core Stores:** Fetch Dashboard data, wire `useWorkoutStore` and `useRecoveryStore` to save to DB.
+- [ ] **Step 34 — Wire Remaining Stores:** Wire Habits/Nutrition to Django, point AI Coach UI to the new backend endpoint, final QA.
