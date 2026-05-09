@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { api } from "@/lib/api/client";
 
 export interface ChatMessage {
   id: string;
@@ -55,27 +56,14 @@ export const useCoachStore = create<CoachState>((set, get) => ({
         content: m.content,
       }));
 
-      const res = await fetch("/api/coach", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...history, { role: "user", content }],
-          context,
-        }),
+      const stream = api.stream("/api/v1/coach/chat/", {
+        messages: [...history, { role: "user", content }],
+        context: context || {},
       });
 
-      if (!res.ok || !res.body) {
-        throw new Error(`API error: ${res.status}`);
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
       let fullContent = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
+      for await (const chunk of stream) {
         fullContent += chunk;
         set({ streamingContent: fullContent });
       }

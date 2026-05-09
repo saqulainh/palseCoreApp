@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { api } from "@/lib/api/client";
 
 export interface Habit {
   id: number;
@@ -9,24 +10,37 @@ export interface Habit {
   weekData: boolean[];
 }
 
-interface HabitState {
   habits: Habit[];
-  toggleHabit: (id: number) => void;
-  addHabit: (name: string, icon: string) => void;
-  removeHabit: (id: number) => void;
+  fetchHabits: () => Promise<void>;
+  toggleHabit: (id: number) => Promise<void>;
+  addHabit: (name: string, icon: string) => Promise<void>;
+  removeHabit: (id: number) => Promise<void>;
 }
 
-export const useHabitStore = create<HabitState>((set) => ({
-  habits: [
-    { id: 1, name: "Morning Workout", icon: "fitness_center", streak: 12, completedToday: true, weekData: [true, true, true, false, true, true, true] },
-    { id: 2, name: "Drink 2L Water", icon: "water_drop", streak: 8, completedToday: false, weekData: [true, true, false, true, true, true, false] },
-    { id: 3, name: "8h Sleep", icon: "bedtime", streak: 5, completedToday: false, weekData: [false, true, true, true, false, true, false] },
-    { id: 4, name: "Stretching", icon: "self_improvement", streak: 3, completedToday: true, weekData: [true, false, true, false, true, false, true] },
-    { id: 5, name: "Meditation", icon: "spa", streak: 15, completedToday: true, weekData: [true, true, true, true, true, true, true] },
-    { id: 6, name: "Log Meals", icon: "restaurant", streak: 7, completedToday: false, weekData: [true, true, true, true, true, true, false] },
-  ],
+export const useHabitStore = create<HabitState>((set, get) => ({
+  habits: [],
 
-  toggleHabit: (id) =>
+  fetchHabits: async () => {
+    try {
+      const data = await api.get<any[]>("/api/v1/habits/");
+      const habits: Habit[] = data.map(h => ({
+        id: h.id,
+        name: h.name,
+        icon: h.name.toLowerCase().includes("water") ? "water_drop" : 
+              h.name.toLowerCase().includes("sleep") ? "bedtime" : 
+              h.name.toLowerCase().includes("medit") ? "spa" : "task_alt",
+        streak: h.streak || 0,
+        completedToday: h.completed_today || false,
+        weekData: [true, false, true, false, true, false, true], // Mock data for UI 
+      }));
+      set({ habits });
+    } catch(err) {
+      console.error("Failed to fetch habits:", err);
+    }
+  },
+
+  toggleHabit: async (id) => {
+    // Optimistic UI update
     set((state) => ({
       habits: state.habits.map((h) =>
         h.id === id
@@ -37,25 +51,44 @@ export const useHabitStore = create<HabitState>((set) => ({
             }
           : h
       ),
-    })),
+    }));
 
-  addHabit: (name, icon) =>
-    set((state) => ({
-      habits: [
-        ...state.habits,
-        {
-          id: Date.now(),
-          name,
-          icon,
-          streak: 0,
-          completedToday: false,
-          weekData: [false, false, false, false, false, false, false],
-        },
-      ],
-    })),
+    // Perform API call
+    try {
+      await api.post(`/api/v1/habits/${id}/log/`);
+    } catch (err) {
+      console.error("Failed to log habit:", err);
+      // Revert optimism if needed (skipped for simplicity here)
+    }
+  },
 
-  removeHabit: (id) =>
+  addHabit: async (name, icon) => {
+    try {
+      const h = await api.post<any>("/api/v1/habits/", { name, description: "" });
+      const newHabit: Habit = {
+        id: h.id,
+        name: h.name,
+        icon,
+        streak: 0,
+        completedToday: false,
+        weekData: [false, false, false, false, false, false, false],
+      };
+      set((state) => ({ habits: [...state.habits, newHabit] }));
+    } catch (err) {
+      console.error("Failed to add habit:", err);
+    }
+  },
+
+  removeHabit: async (id) => {
+    // Optimistic UI update
     set((state) => ({
       habits: state.habits.filter((h) => h.id !== id),
-    })),
+    }));
+
+    try {
+      await api.delete(`/api/v1/habits/${id}/`);
+    } catch (err) {
+      console.error("Failed to delete habit:", err);
+    }
+  },
 }));

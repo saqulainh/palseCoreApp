@@ -1,11 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
 import { useHabitStore } from "@/store/habitStore";
 
 const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export default function HabitsPage() {
-  const { habits, toggleHabit } = useHabitStore();
+  const { habits, fetchHabits, toggleHabit } = useHabitStore();
+
+  useEffect(() => {
+    fetchHabits();
+  }, [fetchHabits]);
 
   const completed = habits.filter((h) => h.completedToday).length;
   const total = habits.length;

@@ -1,25 +1,15 @@
 "use client";
 
-import { useState } from "react";
-
-const DAILY_GOALS = { calories: 2400, protein: 180, carbs: 280, fat: 70 };
-
-const MEALS = [
-  { slot: "Breakfast", icon: "egg_alt", items: [
-    { name: "Oatmeal with banana", cal: 340, p: 12, c: 58, f: 8 },
-    { name: "Protein shake", cal: 200, p: 30, c: 10, f: 4 },
-  ]},
-  { slot: "Lunch", icon: "lunch_dining", items: [
-    { name: "Grilled chicken salad", cal: 480, p: 42, c: 20, f: 26 },
-  ]},
-  { slot: "Dinner", icon: "dinner_dining", items: [] },
-  { slot: "Snacks", icon: "cookie", items: [
-    { name: "Greek yogurt", cal: 150, p: 15, c: 12, f: 5 },
-  ]},
-];
+import { useEffect } from "react";
+import { useNutritionStore } from "@/store/nutritionStore";
 
 export default function NutritionPage() {
-  const [waterGlasses, setWaterGlasses] = useState(5);
+  const { waterGlasses, updateWater, fetchNutrition, meals: MEALS, goals: DAILY_GOALS } = useNutritionStore();
+  
+  useEffect(() => {
+    fetchNutrition();
+  }, [fetchNutrition]);
+
   const all = MEALS.flatMap((s) => s.items);
   const totals = {
     cal: all.reduce((a, m) => a + m.cal, 0),
@@ -113,7 +103,7 @@ export default function NutritionPage() {
           </div>
           <div className="flex justify-between gap-2">
             {Array.from({length:8},(_,i) => (
-              <button key={i} onClick={() => setWaterGlasses(i+1)}
+              <button key={i} onClick={() => updateWater(i+1)}
                 className="flex-1 flex flex-col items-center py-2 rounded-xl transition-all"
                 style={{
                   background: i < waterGlasses ? "rgba(184,196,255,0.08)" : "rgba(12,14,23,0.5)",

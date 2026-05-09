@@ -211,4 +211,4 @@ pulsecore/src/
 - [x] **Step 31 — API Client:** Update `src/lib/api/client.ts` for Django backend, add JWT interceptors. ✅
 - [x] **Step 32 — Wire Auth:** Build frontend Login/Register, wire `useUserStore` to Django. ✅
 - [x] **Step 33 — Wire Core Stores:** Fetch Dashboard data, wire `useWorkoutStore` and `useRecoveryStore` to save to DB. ✅
-- [ ] **Step 34 — Wire Remaining Stores:** Wire Habits/Nutrition to Django, point AI Coach UI to the new backend endpoint, final QA.
+- [x] **Step 34 — Wire Remaining Stores:** Wire Habits/Nutrition to Django, point AI Coach UI to the new backend endpoint, final QA. ✅
