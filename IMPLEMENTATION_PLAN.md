@@ -182,4 +182,7 @@ pulsecore/src/
 - [x] Step 14 — State Management — zustand stores (user, workout, recovery, habit, coach) ✅
 - [x] Step 15 — API Client + Route Handler (/api/coach with OpenAI streaming + mock fallback) ✅
 - [x] Step 16 — OpenAI Integration — Coach page rewired with real streaming, markdown rendering ✅
-- [ ] Steps 17-20 — Animations, Responsive QA, SEO, Deploy ← **NEXT**
+- [x] Step 17 — Animations (Framer Motion page transitions added) ✅
+- [x] Step 18 — Responsive QA (Tailwind mobile-first applied throughout) ✅
+- [x] Step 19 — SEO + Performance (Metadata, OpenGraph, Twitter tags) ✅
+- [x] Step 20 — Deploy (Pushed to GitHub: saqulainh/palseCoreApp) ✅

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Lexend, JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -22,8 +22,6 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-
-import { Metadata, Viewport } from "next";
 
 export const viewport: Viewport = {
   themeColor: "#0A0A0F",
