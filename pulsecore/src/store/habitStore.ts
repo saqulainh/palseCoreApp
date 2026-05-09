@@ -10,6 +10,7 @@ export interface Habit {
   weekData: boolean[];
 }
 
+interface HabitState {
   habits: Habit[];
   fetchHabits: () => Promise<void>;
   toggleHabit: (id: number) => Promise<void>;
