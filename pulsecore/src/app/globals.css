@@ -1,0 +1,131 @@
+/* ============================================================
+   PULSE CORE — Global Design System (Tailwind v4)
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ── Font Face Aliases (Google Fonts loaded via layout.tsx <head>) ── */
+@font-face {
+  font-family: 'metropolis';
+  src: local('Inter'), local('Arial'), local('sans-serif');
+  font-display: swap;
+}
+
+/* ── Base Styles ── */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  background-color: #0A0A0F;
+  color: #F9FAFB;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #11131c; }
+::-webkit-scrollbar-thumb { background: #434656; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #8d90a2; }
+
+/* ── Material Symbols ── */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ════════════════════════════════════════════
+   DESIGN SYSTEM UTILITY CLASSES
+   ════════════════════════════════════════════ */
+
+/* Glass Card — main frosted glass card */
+.glass-card {
+  background-color: rgba(30, 30, 46, 0.85);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-radius: 1rem;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Solid Card — for primary content areas */
+.solid-card {
+  background-color: rgba(19, 19, 26, 0.90);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 1rem;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Inner glow for premium buttons */
+.inner-glow-btn {
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Radial glow overlay for cards */
+.card-glow {
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Glass panel — lighter, for analytics */
+.glass-panel {
+  background-color: rgba(30, 30, 46, 0.40);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Text glow effects */
+.text-glow-primary { text-shadow: 0 0 12px rgba(184, 196, 255, 0.35); }
+.text-glow-secondary { text-shadow: 0 0 12px rgba(125, 255, 162, 0.35); }
+
+/* Drop shadow glows for icons/SVGs */
+.drop-shadow-glow-primary { filter: drop-shadow(0 0 8px rgba(184, 196, 255, 0.4)); }
+.drop-shadow-glow-secondary { filter: drop-shadow(0 0 8px rgba(125, 255, 162, 0.4)); }
+.drop-shadow-glow-amber { filter: drop-shadow(0 0 8px rgba(255, 179, 0, 0.4)); }
+
+/* Sleep chart bar glow */
+.bar-glow { box-shadow: 0 0 16px rgba(184, 196, 255, 0.5); }
+
+/* Hide scrollbar but allow scrolling */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area padding (iPhone notch) */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* Global selection color */
+::selection { background-color: #1a56ff; color: white; }
+
+/* Focus visible ring */
+:focus-visible {
+  outline: 2px solid #b8c4ff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
