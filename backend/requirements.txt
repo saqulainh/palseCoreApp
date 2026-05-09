@@ -8,3 +8,4 @@ redis
 openai
 django-filter
 drf-spectacular
+gunicorn
