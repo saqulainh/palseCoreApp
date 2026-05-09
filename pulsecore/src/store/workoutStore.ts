@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { api } from "@/lib/api/client";
 
 export interface ExerciseSet {
   reps: number;
@@ -46,15 +47,16 @@ interface WorkoutState {
 
   // Actions
   startSession: (session: WorkoutSession) => void;
-  finishSession: () => void;
+  finishSession: () => Promise<void>;
   completeSet: (exerciseIndex: number, setIndex: number) => void;
   setCurrentExercise: (index: number) => void;
   startRest: (seconds: number) => void;
   skipRest: () => void;
   tickRest: () => void;
+  fetchHistory: () => Promise<void>;
 }
 
-export const useWorkoutStore = create<WorkoutState>((set) => ({
+export const useWorkoutStore = create<WorkoutState>((set, get) => ({
   activeSession: null,
   currentExerciseIndex: 0,
   isResting: false,
@@ -62,34 +64,76 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
   history: [
     { id: "1", name: "Upper Body Push", date: "May 7", duration: "52 min", volume: "4,200 kg", icon: "fitness_center" },
     { id: "2", name: "Lower Body Strength", date: "May 6", duration: "58 min", volume: "6,100 kg", icon: "directions_run" },
-    { id: "3", name: "Pull Day + Core", date: "May 5", duration: "48 min", volume: "3,800 kg", icon: "fitness_center" },
-    { id: "4", name: "Active Recovery", date: "May 4", duration: "30 min", volume: "—", icon: "self_improvement" },
   ],
 
   startSession: (session) => set({ activeSession: session, currentExerciseIndex: 0, isResting: false, restTimer: 0 }),
 
-  finishSession: () =>
-    set((state) => {
-      if (!state.activeSession) return state;
-      const completedSets = state.activeSession.exercises.reduce(
-        (a, e) => a + e.sets.filter((s) => s.completed).length, 0
-      );
-      const newEntry: WorkoutHistoryEntry = {
-        id: Date.now().toString(),
-        name: state.activeSession.name,
-        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        duration: `${Math.floor(state.activeSession.duration / 60)} min`,
-        volume: `${completedSets * 120} kg`,
-        icon: "fitness_center",
-      };
-      return {
-        activeSession: null,
-        currentExerciseIndex: 0,
-        isResting: false,
-        restTimer: 0,
-        history: [newEntry, ...state.history],
-      };
-    }),
+  finishSession: async () => {
+    const { activeSession, history } = get();
+    if (!activeSession) return;
+    
+    const completedSets = activeSession.exercises.reduce(
+      (a, e) => a + e.sets.filter((s) => s.completed).length, 0
+    );
+    
+    const payload = {
+      name: activeSession.name,
+      duration_minutes: Math.floor(activeSession.duration / 60),
+      notes: "Logged via PulseCore frontend",
+      sets: activeSession.exercises.flatMap((ex, i) => 
+        ex.sets.filter(s => s.completed).map((s, j) => ({
+          exercise: 1, // Fallback to exercise ID 1 for MVP
+          reps: s.reps,
+          weight: s.weight,
+          completed: s.completed,
+          order: j
+        }))
+      )
+    };
+
+    try {
+      // Save to Django Backend
+      await api.post("/api/v1/workouts/", payload);
+    } catch(err) {
+      console.error("Failed to save workout to backend:", err);
+    }
+
+    const newEntry: WorkoutHistoryEntry = {
+      id: Date.now().toString(),
+      name: activeSession.name,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      duration: `${Math.floor(activeSession.duration / 60)} min`,
+      volume: `${completedSets * 120} kg`,
+      icon: "fitness_center",
+    };
+    
+    set({
+      activeSession: null,
+      currentExerciseIndex: 0,
+      isResting: false,
+      restTimer: 0,
+      history: [newEntry, ...history],
+    });
+  },
+
+  fetchHistory: async () => {
+    try {
+      const data = await api.get<any[]>("/api/v1/workouts/");
+      if (data && data.length > 0) {
+        const history = data.map(w => ({
+          id: w.id.toString(),
+          name: w.name,
+          date: new Date(w.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          duration: `${w.duration_minutes || 0} min`,
+          volume: "—",
+          icon: "fitness_center",
+        }));
+        set({ history });
+      }
+    } catch(err) {
+      console.error("Failed to fetch history:", err);
+    }
+  },
 
   completeSet: (exerciseIndex, setIndex) =>
     set((state) => {

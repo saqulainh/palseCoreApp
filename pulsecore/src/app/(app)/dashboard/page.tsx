@@ -1,13 +1,26 @@
-import { ProgressRing } from "@/components/ui/ProgressRing";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Dashboard — Pulse Core",
-  description: "Your daily fitness overview — recovery score, today's workout, streak, and sleep.",
-};
+import { useEffect, useState } from "react";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { api } from "@/lib/api/client";
+import { useUserStore } from "@/store/userStore";
 
 export default function DashboardPage() {
-  return (
+  const profile = useUserStore((state) => state.profile);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api.get("/api/v1/dashboard/")
+      .then((data) => {
+        setDashboardData(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch dashboard", err);
+        setIsLoading(false);
+      });
+  }, []);
     <div className="px-5 pt-2 pb-10 space-y-8 max-w-3xl mx-auto">
       {/* ── Greeting ── */}
       <div className="pt-2">
@@ -19,7 +32,7 @@ export default function DashboardPage() {
             color: "#F9FAFB",
           }}
         >
-          Good Morning, Athlete.
+          Good Morning, {profile?.name || "Athlete"}.
         </h2>
         <p className="text-[14px] text-[#9CA3AF] mt-1">
           Ready to push your limits?
@@ -40,8 +53,8 @@ export default function DashboardPage() {
           Biometrics Overview
         </h3>
         <div className="flex justify-around items-center mb-5">
-          <ProgressRing value={82} color="secondary" label="Recovery" />
-          <ProgressRing value={74} color="amber" label="Readiness" />
+          <ProgressRing value={dashboardData?.today_recovery?.score || 82} color="secondary" label="Recovery" />
+          <ProgressRing value={dashboardData?.today_recovery?.hrv || 74} color="amber" label="Readiness" />
         </div>
         {/* AI Insight banner */}
         <div
@@ -88,7 +101,7 @@ export default function DashboardPage() {
               boxShadow: "inset 0 0 8px rgba(184,196,255,0.1)",
             }}
           >
-            45 MIN
+            {dashboardData?.today_workout?.duration_minutes || 45} MIN
           </span>
         </div>
         <h4
@@ -100,10 +113,10 @@ export default function DashboardPage() {
             color: "#F9FAFB",
           }}
         >
-          HIIT: Metcon Blast
+          {dashboardData?.today_workout?.name || "HIIT: Metcon Blast"}
         </h4>
         <div className="flex flex-wrap gap-2 mb-6">
-          {["Kettlebell Swings", "Box Jumps", "Burpees"].map((ex) => (
+          {(dashboardData?.today_workout?.exercises || ["Kettlebell Swings", "Box Jumps", "Burpees"]).map((ex: string) => (
             <span
               key={ex}
               className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] px-3 py-1.5 rounded-full border"

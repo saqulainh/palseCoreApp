@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { api } from "@/lib/api/client";
 
 export interface RecoveryBreakdown {
   sleepQuality: number;
@@ -27,7 +28,8 @@ interface RecoveryState {
   // Actions
   updateRecoveryScore: (score: number) => void;
   updateMuscleSoreness: (muscleId: string, soreness: number) => void;
-  refreshScores: () => void;
+  refreshScores: () => Promise<void>;
+  fetchRecovery: () => Promise<void>;
 }
 
 const DEFAULT_MUSCLES: MuscleStatus[] = [
@@ -44,7 +46,7 @@ const DEFAULT_MUSCLES: MuscleStatus[] = [
   { id: "hamstrings", label: "Hamstrings", side: "back", x: 62, y: 58, soreness: 3 },
 ];
 
-export const useRecoveryStore = create<RecoveryState>((set) => ({
+export const useRecoveryStore = create<RecoveryState>((set, get) => ({
   recoveryScore: 82,
   readinessScore: 74,
   breakdown: {
@@ -66,16 +68,45 @@ export const useRecoveryStore = create<RecoveryState>((set) => ({
       ),
     })),
 
-  refreshScores: () =>
-    set((state) => {
-      // Recalculate recovery from breakdown
-      const { sleepQuality, hrv, restingHR, soreness } = state.breakdown;
-      const score = Math.round(sleepQuality * 0.4 + hrv * 0.3 + restingHR * 0.15 + soreness * 0.15);
-      const level =
-        score < 40 ? "rest" as const :
-        score < 60 ? "easy" as const :
-        score < 80 ? "moderate" as const :
-        "intense" as const;
-      return { recoveryScore: score, readinessLevel: level };
-    }),
+  refreshScores: async () => {
+    const { breakdown, muscles } = get();
+    const { sleepQuality, hrv, restingHR, soreness } = breakdown;
+    const score = Math.round(sleepQuality * 0.4 + hrv * 0.3 + restingHR * 0.15 + soreness * 0.15);
+    const level =
+      score < 40 ? "rest" as const :
+      score < 60 ? "easy" as const :
+      score < 80 ? "moderate" as const :
+      "intense" as const;
+      
+    set({ recoveryScore: score, readinessLevel: level });
+
+    try {
+      await api.post("/api/v1/recovery/", {
+        sleep_hours: sleepQuality / 10,
+        sleep_quality: Math.round(sleepQuality / 10),
+        stress_level: 5,
+        hrv: hrv,
+        rhr: restingHR,
+        score: score,
+        muscle_soreness: muscles.filter(m => m.soreness > 0).map(m => ({
+          muscle_group: m.id,
+          level: m.soreness
+        }))
+      });
+    } catch(err) {
+      console.error("Failed to save recovery score to backend:", err);
+    }
+  },
+
+  fetchRecovery: async () => {
+    try {
+      const data = await api.get<any[]>("/api/v1/recovery/");
+      if (data && data.length > 0) {
+        const latest = data[data.length - 1]; // or [0] depending on ordering
+        set({ recoveryScore: latest.score || 82 });
+      }
+    } catch(err) {
+      console.error("Failed to fetch recovery data:", err);
+    }
+  }
 }));

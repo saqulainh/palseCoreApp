@@ -3,10 +3,12 @@
  * Centralized fetch wrapper with auth headers, error handling, and streaming support.
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// Default to the local Django backend if no env var is set
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 interface FetchOptions extends RequestInit {
   timeout?: number;
+  skipAuth?: boolean;
 }
 
 class ApiError extends Error {
@@ -21,11 +23,22 @@ class ApiError extends Error {
   }
 }
 
+function getAuthHeaders(skipAuth?: boolean) {
+  if (skipAuth || typeof window === "undefined") return {};
+  
+  const token = localStorage.getItem("pulsecore_access_token");
+  if (!token) return {};
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 async function request<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const { timeout = 10000, headers: customHeaders, ...rest } = options;
+  const { timeout = 10000, headers: customHeaders, skipAuth, ...rest } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -36,6 +49,7 @@ async function request<T>(
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders(skipAuth),
         ...customHeaders,
       },
     });
@@ -65,7 +79,10 @@ async function* streamRequest(
 ): AsyncGenerator<string> {
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...getAuthHeaders()
+    },
     body: JSON.stringify(body),
   });
 
